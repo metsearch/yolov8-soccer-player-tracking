@@ -34,23 +34,24 @@ def setup(path2data, path2results):
     })
         
 @router_cmd.command()
-@click.option('--path2data', help='Path to source data', required=True)
+@click.option('--path2test', help='Path to test data', default='data/test/images')
 @click.option('--path2output', help='Path to output predictions', default='results/default/')
-def default_inference(path2data, path2output):
+def default_inference(path2test, path2output):
     logger.info('... [ Predicting with pretrained Yolov8 ] ...')
     if not os.path.exists(path2output):
         os.makedirs(path2output)
         
     model = YOLO('yolov8n.pt')
 
-    images_paths = pull_files(path2data)
-    results = model(images_paths[:5])
+    images_paths = pull_files(path2test)
+    images_names = [os.path.basename(image_path) for image_path in images_paths]
+    results = model(images_paths)
     for i, result in enumerate(results):
         # boxes = result.boxes
         # masks = result.masks
         # keypoints = result.keypoints
         # probs = result.probs
-        result.save(filename=os.path.join(path2output, f'result_{i+1:03d}.jpg'))
+        result.save(filename=os.path.join(path2output, images_names[i]))
     
 @router_cmd.command()
 @click.option('--yaml_file', help='Path to train yaml file', default='data/data.yaml')
